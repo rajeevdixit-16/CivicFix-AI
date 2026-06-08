@@ -20,9 +20,13 @@ import { ApiError } from "./utils/ApiError.js";
 const app = express();
 
 // 1. GLOBAL MIDDLEWARES
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+  : ["http://localhost:5173"];
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );

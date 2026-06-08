@@ -87,6 +87,7 @@ export function Login({ isSignup }) {
 
           <div className="flex justify-center">
             <GoogleLogin
+              key={isSignup ? "signup" : "signin"}
               text={isSignup ? "signup_with" : "signin_with"}
               theme="filled_black"
               shape="pill"
