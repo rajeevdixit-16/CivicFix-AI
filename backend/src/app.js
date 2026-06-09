@@ -46,6 +46,21 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.get("/test-email", async (req, res) => {
+  try {
+    await sendEmail(
+      "your-email@gmail.com",
+      "Test",
+      "<h1>Hello</h1>"
+    );
+
+    res.send("Email sent");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err.message);
+  }
+});
+
 // 2. ROUTES DECLARATION
 app.use("/api/auth", authRoutes);
 app.use("/api/complaint", complaintRoutes);
