@@ -119,7 +119,7 @@ export const register = asyncHandler(async (req, res) => {
   if (user && user.isVerified)
     throw new ApiError(400, "Email already registered");
 
-  const otp = generateOTP();
+  // const otp = generateOTP(); // OTP removed
 
   if (!user) {
     user = await User.create({
@@ -128,33 +128,42 @@ export const register = asyncHandler(async (req, res) => {
       password,
       role: "citizen",
       wardId: null,
-      isVerified: false,
+      isVerified: true, // directly verified (OTP removed)
       providers: ["local"],
-      otp: {
-        code: otp,
-        expiresAt: Date.now() + 10 * 60 * 1000,
-      },
+      // otp removed
     });
   } else {
-    user.otp = {
-      code: otp,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-    };
+    // user exists but unverified — verify directly
+    user.isVerified = true;
+    // user.otp = undefined;
     await user.save();
   }
 
-  await sendEmail(
-    email,
-    "CivicFix AI – Email Verification OTP",
-    `<h2>Your OTP is: <b>${otp}</b></h2>`
+  // OTP email removed
+
+  // Generate tokens so user is logged in immediately
+  const accessToken = user.generateAccessToken();
+  const refreshToken = crypto.randomBytes(40).toString("hex");
+
+  await user.addRefreshSession(
+    refreshToken,
+    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    req.headers["user-agent"],
+    req.ip
   );
 
   return res.json(new ApiResponse(200,
     {
-      email,
-      role: "citizen",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        wardId: user.wardId,
+      },
+      accessToken,
+      refreshToken,
     }
-    , "OTP sent to email"));
+    , "Account created successfully"));
 });
 
 export const verifyOtp = asyncHandler(async (req, res) => {

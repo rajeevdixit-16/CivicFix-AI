@@ -20,6 +20,16 @@ export const deactivateAuthority = async (id) => {
   return res.data;
 };
 
+export const reactivateAuthority = async (id) => {
+  const res = await api.patch(`/admin/authorities/${id}/reactivate`);
+  return res.data;
+};
+
+export const deleteAuthority = async (id) => {
+  const res = await api.delete(`/admin/authorities/${id}`);
+  return res.data;
+};
+
 export const getEscalations = async () => {
   const res = await api.get("/admin/escalations");
   return res.data;

@@ -24,10 +24,13 @@ export function Login({ isSignup }) {
 
     try {
       if (isSignup) {
-        await registerUser({ name: email.split("@")[0], email, password, role: "citizen", city: currentAddress });
-        toast.success("OTP sent to your email");
-        sessionStorage.setItem("pendingEmail", email);
-        navigate("verify-otp");
+        const res = await registerUser({ name: email.split("@")[0], email, password, role: "citizen", city: currentAddress });
+        const { user, accessToken } = res.data;
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("role", user.role);
+        setAuth(user.role, user);
+        toast.success("Account created successfully");
+        navigate(user.role === "admin" ? "admin-dashboard" : user.role === "authority" ? "authority-dashboard" : "citizen-dashboard");
         return;
       }
 
@@ -59,6 +62,18 @@ export function Login({ isSignup }) {
               {isSignup ? "Join CivicFix AI" : "Welcome Back"}
             </h1>
             <p className="text-sm text-text-muted mt-1">Improving your community</p>
+          </div>
+
+          <div className="mb-6 p-4 border-2 border-red-500/60 bg-red-500/10 rounded-xl text-center">
+            <p className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">
+              Interviewer Demo Access
+            </p>
+            <p className="text-sm font-bold text-red-700 dark:text-red-300">
+              Admin: admin@civicfix.com / Admin@123
+            </p>
+            <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+              Authority accounts are created by Admin from the Admin Dashboard
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

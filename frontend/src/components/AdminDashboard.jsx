@@ -11,6 +11,8 @@ import {
   X,
   Loader2,
   AlertTriangle,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { Card } from "./Card";
 import { Badge } from "./Badge";
@@ -21,6 +23,8 @@ import {
   createAuthority,
   updateAuthority,
   deactivateAuthority,
+  reactivateAuthority,
+  deleteAuthority,
 } from "../services/admin.service";
 import { fetchWards, fetchCities } from "../services/ward.service";
 import { useAppStore } from "../store/useAppStore";
@@ -297,6 +301,25 @@ export function AdminDashboard({ onNavigate, onLogout }) {
     }
   };
 
+  const handleReactivate = async (id) => {
+    try {
+      await reactivateAuthority(id);
+      loadAuthorities();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to reactivate");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Permanently delete this authority account? This cannot be undone.")) return;
+    try {
+      await deleteAuthority(id);
+      loadAuthorities();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete");
+    }
+  };
+
   const formatDate = (d) =>
     new Intl.DateTimeFormat("en-IN", { month: "short", day: "numeric", year: "numeric" }).format(new Date(d));
 
@@ -369,6 +392,7 @@ export function AdminDashboard({ onNavigate, onLogout }) {
               </div>
 
               <Card className="overflow-hidden border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl rounded-2xl">
+                <div className="overflow-x-auto">
                 {loading ? (
                   <div className="flex justify-center p-12">
                     <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
@@ -379,6 +403,7 @@ export function AdminDashboard({ onNavigate, onLogout }) {
                       <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest">
                         <th className="px-6 py-4 text-left">Name</th>
                         <th className="px-6 py-4 text-left">Email</th>
+                        <th className="px-6 py-4 text-left">Password</th>
                         <th className="px-6 py-4 text-left">Ward</th>
                         <th className="px-6 py-4 text-left">City</th>
                         <th className="px-6 py-4 text-left">Status</th>
@@ -391,6 +416,11 @@ export function AdminDashboard({ onNavigate, onLogout }) {
                         <tr key={a._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                           <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{a.name}</td>
                           <td className="px-6 py-4 text-sm text-slate-500">{a.email}</td>
+                          <td className="px-6 py-4">
+                            <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                              {a.displayPassword || "—"}
+                            </span>
+                          </td>
                           <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
                             {a.wardId?.name || "—"}
                           </td>
@@ -413,7 +443,7 @@ export function AdminDashboard({ onNavigate, onLogout }) {
                               >
                                 <Edit2 size={14} />
                               </button>
-                              {a.isActive !== false && (
+                              {a.isActive !== false ? (
                                 <button
                                   onClick={() => handleDeactivate(a._id)}
                                   className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-600/10 rounded-lg transition-all"
@@ -421,14 +451,29 @@ export function AdminDashboard({ onNavigate, onLogout }) {
                                 >
                                   <X size={14} />
                                 </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleReactivate(a._id)}
+                                  className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-600/10 rounded-lg transition-all"
+                                  title="Reactivate"
+                                >
+                                  <RefreshCw size={14} />
+                                </button>
                               )}
+                              <button
+                                onClick={() => handleDelete(a._id)}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-600/10 rounded-lg transition-all"
+                                title="Delete permanently"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           </td>
                         </tr>
                       ))}
                       {authorities.length === 0 && (
                         <tr>
-                          <td colSpan={7} className="py-12 text-center text-slate-400 italic">
+                          <td colSpan={8} className="py-12 text-center text-slate-400 italic">
                             No authority accounts yet. Create one to get started.
                           </td>
                         </tr>
@@ -436,6 +481,7 @@ export function AdminDashboard({ onNavigate, onLogout }) {
                     </tbody>
                   </table>
                 )}
+                </div>
               </Card>
             </div>
           )}

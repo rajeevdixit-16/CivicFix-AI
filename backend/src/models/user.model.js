@@ -50,6 +50,11 @@ const userSchema = new Schema(
       default: null,
     },
 
+    displayPassword: {
+      type: String,
+      default: null,
+    },
+
     avatar: {
       type: String,
       default: null,

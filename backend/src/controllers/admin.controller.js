@@ -122,7 +122,7 @@ export const getEscalations = asyncHandler(async (req, res) => {
 export const getAuthorities = asyncHandler(async (req, res) => {
   const authorities = await User.find(
     { role: "authority" },
-    "name email wardId isActive createdAt"
+    "name email displayPassword wardId isActive createdAt"
   ).populate("wardId", "name city");
 
   res.json(
@@ -153,6 +153,7 @@ export const createAuthority = asyncHandler(async (req, res) => {
     name,
     email,
     password: tempPassword,
+    displayPassword: tempPassword,
     role: "authority",
     wardId,
     isVerified: true,
@@ -214,5 +215,36 @@ export const deactivateAuthority = asyncHandler(async (req, res) => {
 
   res.json(
     new ApiResponse(200, null, "Authority deactivated successfully")
+  );
+});
+
+export const reactivateAuthority = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+  if (!user || user.role !== "authority") {
+    throw new ApiError(404, "Authority not found");
+  }
+
+  user.isActive = true;
+  await user.save();
+
+  res.json(
+    new ApiResponse(200, null, "Authority reactivated successfully")
+  );
+});
+
+export const deleteAuthority = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+  if (!user || user.role !== "authority") {
+    throw new ApiError(404, "Authority not found");
+  }
+
+  await User.findByIdAndDelete(id);
+
+  res.json(
+    new ApiResponse(200, null, "Authority account deleted permanently")
   );
 });

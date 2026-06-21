@@ -7,6 +7,8 @@ import {
   createAuthority,
   updateAuthority,
   deactivateAuthority,
+  reactivateAuthority,
+  deleteAuthority,
 } from "../controllers/admin.controller.js";
 
 import auth, { authorize } from "../middleware/auth.middleware.js";
@@ -61,6 +63,20 @@ router.patch(
   auth,
   authorize("admin"),
   deactivateAuthority
+);
+
+router.patch(
+  "/authorities/:id/reactivate",
+  auth,
+  authorize("admin"),
+  reactivateAuthority
+);
+
+router.delete(
+  "/authorities/:id",
+  auth,
+  authorize("admin"),
+  deleteAuthority
 );
 
 export default router;

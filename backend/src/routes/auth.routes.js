@@ -15,7 +15,7 @@ const router = express.Router();
 
 // Auth + OTP
 router.post("/register", register); // step 1: send OTP
-router.post("/verify-otp", verifyOtp); // step 2: confirm OTP
+// router.post("/verify-otp", verifyOtp); // step 2: confirm OTP (removed)
 
 // Auth session
 router.post("/login", login);
